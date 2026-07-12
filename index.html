@@ -1,30 +1,475 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flowlog — Task boards with a built-in focus timer</title>
+<meta name="description" content="Flowlog is a kanban task manager with a real focus and break timer built in. Plan your boards, track priorities and due dates, and log every deep-work session automatically.">
 
-    <title>
-      Flowlog - Free Todo List, Kanban Board & Productivity Timer
-    </title>
+<!-- Open Graph -->
+<meta property="og:title" content="Flowlog — Task boards with a built-in focus timer">
+<meta property="og:description" content="Plan your work on kanban boards, then run focus and break sessions right alongside it. Every session gets logged automatically.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://flowlog.app/">
+<meta property="og:image" content="https://flowlog.app/og-image.png">
 
-    <meta 
-      name="description" 
-      content="Flowlog is a free productivity app to organize and track tasks, manage your Kanban board, track time, and improve your focus."
-    />
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Flowlog — Task boards with a built-in focus timer">
+<meta name="twitter:description" content="Plan your work on kanban boards, then run focus and break sessions right alongside it.">
 
-    <meta 
-      name="keywords"
-      content="todo list, task manager, productivity app, kanban board, pomodoro timer, time tracker"
-    />
+<link rel="canonical" href="https://flowlog.app/">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Flowlog",
+  "applicationCategory": "ProductivityApplication",
+  "operatingSystem": "Web",
+  "description": "Kanban task manager with a built-in focus and break timer, session logging, and multi-board organization.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
 
-    <link rel="icon" href="/favicon.ico" />
-  </head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<style>
+  :root{
+    --ink:#12141C;
+    --paper:#EEF0EA;
+    --focus:#2E4BD1;
+    --break:#D9A441;
+    --line:#D8DAD1;
+    --muted:#6B7059;
+    --paper-card:#F7F8F3;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  .wrap{max-width:1120px; margin:0 auto; padding:0 28px;}
+
+  a{color:inherit;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(238,240,234,0.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px;
+  }
+  .logo{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700; font-size:1.15rem;
+    letter-spacing:-0.01em;
+    display:flex; align-items:center; gap:8px;
+    text-decoration:none;
+  }
+  .logo-dot{
+    width:9px; height:9px; border-radius:50%;
+    background:var(--focus);
+    animation:pulse-dot 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse-dot{
+    0%,100%{background:var(--focus);}
+    50%{background:var(--break);}
+  }
+  .nav-cta{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.8rem;
+    background:var(--ink);
+    color:var(--paper);
+    padding:9px 18px;
+    border-radius:6px;
+    text-decoration:none;
+    transition:transform 0.15s ease, background 0.15s ease;
+    display:inline-block;
+  }
+  .nav-cta:hover{background:var(--focus); transform:translateY(-1px);}
+  .nav-cta:focus-visible, a:focus-visible, button:focus-visible{
+    outline:2px solid var(--focus); outline-offset:3px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:88px 0 96px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.1fr 0.9fr;
+    gap:64px;
+    align-items:center;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-bottom:18px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:20px; height:1px; background:var(--muted);
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:clamp(2.3rem, 4.4vw, 3.5rem);
+    line-height:1.06;
+    letter-spacing:-0.02em;
+    margin-bottom:22px;
+  }
+  h1 em{
+    font-style:normal;
+    color:var(--focus);
+  }
+  .hero p.lead{
+    font-size:1.1rem;
+    color:var(--muted);
+    max-width:46ch;
+    margin-bottom:34px;
+  }
+  .cta-row{display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  .cta-primary{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:1rem;
+    background:var(--ink);
+    color:var(--paper);
+    padding:15px 26px;
+    border-radius:8px;
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:10px;
+    transition:background 0.15s ease, transform 0.15s ease;
+  }
+  .cta-primary:hover{background:var(--focus); transform:translateY(-2px);}
+  .cta-secondary{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.85rem;
+    color:var(--muted);
+    text-decoration:underline;
+    text-underline-offset:3px;
+  }
+
+  /* ---------- HERO VISUAL: ring + log ---------- */
+  .hero-visual{
+    background:var(--ink);
+    border-radius:16px;
+    padding:32px 28px;
+    color:var(--paper);
+    font-family:'JetBrains Mono', monospace;
+  }
+  .ring-block{
+    display:flex; align-items:center; gap:20px;
+    padding-bottom:22px; margin-bottom:20px;
+    border-bottom:1px solid rgba(238,240,234,0.14);
+  }
+  .ring-wrap{position:relative; width:88px; height:88px; flex-shrink:0;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-bg{fill:none; stroke:rgba(238,240,234,0.14); stroke-width:6;}
+  .ring-progress{
+    fill:none; stroke:var(--focus); stroke-width:6; stroke-linecap:round;
+    stroke-dasharray:251; stroke-dashoffset:251;
+    animation:ring-cycle 24s linear infinite;
+  }
+  @keyframes ring-cycle{
+    0%{stroke-dashoffset:251; stroke:var(--focus);}
+    45%{stroke-dashoffset:0; stroke:var(--focus);}
+    50%{stroke:var(--break);}
+    95%{stroke-dashoffset:251; stroke:var(--break);}
+    100%{stroke-dashoffset:251; stroke:var(--focus);}
+  }
+  .ring-label{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:0.68rem; color:var(--paper); opacity:0.85;
+  }
+  .ring-meta .state{font-size:0.95rem; font-weight:500; margin-bottom:4px;}
+  .ring-meta .sub{font-size:0.75rem; opacity:0.55;}
+
+  .log-feed{font-size:0.78rem; line-height:1.9;}
+  .log-feed .row{display:flex; gap:12px; opacity:0; animation:log-in 0.4s ease forwards;}
+  .log-feed .row:nth-child(1){animation-delay:0.2s;}
+  .log-feed .row:nth-child(2){animation-delay:0.9s;}
+  .log-feed .row:nth-child(3){animation-delay:1.6s;}
+  .log-feed .row:nth-child(4){animation-delay:2.3s;}
+  @keyframes log-in{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+  .log-feed .ts{color:var(--break); flex-shrink:0;}
+  .log-feed .desc{opacity:0.8;}
+
+  /* ---------- FEATURES ---------- */
+  .features{padding:96px 0;}
+  .section-head{margin-bottom:56px; max-width:60ch;}
+  .section-head .eyebrow{margin-bottom:14px;}
+  h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:clamp(1.6rem, 3vw, 2.1rem);
+    letter-spacing:-0.01em;
+  }
+  .feature-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .feature{
+    background:var(--paper-card);
+    padding:32px 28px;
+  }
+  .feature .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    color:var(--muted);
+    margin-bottom:16px;
+    display:block;
+  }
+  .feature h3{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:1.05rem;
+    margin-bottom:10px;
+  }
+  .feature p{color:var(--muted); font-size:0.92rem;}
+
+  /* ---------- FLOW STRIP ---------- */
+  .flow-strip{
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:80px 0;
+  }
+  .flow-strip .wrap{
+    display:grid;
+    grid-template-columns:0.8fr 1.2fr;
+    gap:56px;
+    align-items:start;
+  }
+  .flow-list{list-style:none;}
+  .flow-list li{
+    display:flex; gap:16px;
+    padding:20px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .flow-list li:last-child{border-bottom:none;}
+  .flow-list .time{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    color:var(--focus);
+    flex-shrink:0;
+    width:64px;
+    padding-top:2px;
+  }
+  .flow-list .body h4{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:0.98rem;
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  .flow-list .body p{color:var(--muted); font-size:0.9rem;}
+
+  /* ---------- FINAL CTA ---------- */
+  .final-cta{
+    padding:110px 0;
+    text-align:center;
+  }
+  .final-cta h2{
+    font-size:clamp(1.8rem, 4vw, 2.6rem);
+    max-width:20ch;
+    margin:0 auto 28px;
+  }
+  .final-cta .cta-primary{margin-bottom:14px;}
+  .final-cta .cta-secondary{display:block;}
+
+  footer{
+    border-top:1px solid var(--line);
+    padding:32px 0;
+  }
+  footer .wrap{
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.75rem;
+    color:var(--muted);
+  }
+
+  @media (max-width:860px){
+    .hero .wrap{grid-template-columns:1fr;}
+    .feature-grid{grid-template-columns:1fr;}
+    .flow-strip .wrap{grid-template-columns:1fr;}
+    .hero{padding:56px 0 64px;}
+    .features, .flow-strip{padding:64px 0;}
+    .final-cta{padding:72px 0;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="#" class="logo"><span class="logo-dot"></span>flowlog</a>
+    <a href="/app/" class="nav-cta">Open app →</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Task boards + focus timer</p>
+      <h1>Plan the work.<br>Then <em>log</em> the focus.</h1>
+      <p class="lead">Flowlog puts your kanban boards and your focus timer in the same place, so every deep-work session gets tracked against the task it belongs to — automatically.</p>
+      <div class="cta-row">
+        <a href="/app/" class="cta-primary">Open Flowlog →</a>
+        <a href="#features" class="cta-secondary">See how it works</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="ring-block">
+        <div class="ring-wrap">
+          <svg width="88" height="88" viewBox="0 0 88 88">
+            <circle class="ring-bg" cx="44" cy="44" r="40"></circle>
+            <circle class="ring-progress" cx="44" cy="44" r="40"></circle>
+          </svg>
+          <span class="ring-label">25:00</span>
+        </div>
+        <div class="ring-meta">
+          <div class="state">Focus session running</div>
+          <div class="sub">Board: Landing page → Task: Write hero copy</div>
+        </div>
+      </div>
+      <div class="log-feed">
+        <div class="row"><span class="ts">09:14</span><span class="desc">started focus — "Write hero copy"</span></div>
+        <div class="row"><span class="ts">09:39</span><span class="desc">session logged — 25m focus</span></div>
+        <div class="row"><span class="ts">09:39</span><span class="desc">started break — 5m</span></div>
+        <div class="row"><span class="ts">09:44</span><span class="desc">back to board: Landing page</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">What's in the app</p>
+      <h2>Five pieces, one loop: plan, focus, break, log, repeat.</h2>
+    </div>
+    <div class="feature-grid">
+      <div class="feature">
+        <span class="tag">boards</span>
+        <h3>Multiple boards</h3>
+        <p>Keep separate boards per project or context, and switch between them without losing your place.</p>
+      </div>
+      <div class="feature">
+        <span class="tag">kanban</span>
+        <h3>Kanban view</h3>
+        <p>Drag tasks across columns with priority, due dates, and tags visible at a glance.</p>
+      </div>
+      <div class="feature">
+        <span class="tag">timer</span>
+        <h3>Focus &amp; break timer</h3>
+        <p>Run a real timer alongside your board — no separate app, no tab-switching to stay accountable.</p>
+      </div>
+      <div class="feature">
+        <span class="tag">history</span>
+        <h3>Session log</h3>
+        <p>Every focus block is recorded automatically, tied to the task you were actually working on.</p>
+      </div>
+      <div class="feature">
+        <span class="tag">timeline</span>
+        <h3>Timeline view</h3>
+        <p>See your day laid out chronologically — what got worked on, when, and for how long.</p>
+      </div>
+      <div class="feature">
+        <span class="tag">tags</span>
+        <h3>Priority &amp; tags</h3>
+        <p>Sort what matters with due dates, priority flags, and custom tags across every board.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="flow-strip">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">A typical block</p>
+      <h2>Built around how deep work actually happens.</h2>
+    </div>
+    <ul class="flow-list">
+      <li>
+        <span class="time">01</span>
+        <div class="body">
+          <h4>Pick a task from the board</h4>
+          <p>Open the kanban view, grab the next priority item, drag it into "In progress."</p>
+        </div>
+      </li>
+      <li>
+        <span class="time">02</span>
+        <div class="body">
+          <h4>Start a focus session</h4>
+          <p>The timer runs right next to the board — no context switch to a separate timer app.</p>
+        </div>
+      </li>
+      <li>
+        <span class="time">03</span>
+        <div class="body">
+          <h4>Take the break</h4>
+          <p>Flowlog logs the session and drops you into a break timer automatically.</p>
+        </div>
+      </li>
+      <li>
+        <span class="time">04</span>
+        <div class="body">
+          <h4>Review the timeline</h4>
+          <p>At the end of the day, the timeline view shows exactly where the hours went.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="wrap">
+    <h2>Your boards and your focus time, finally in one place.</h2>
+    <a href="/app/" class="cta-primary">Open Flowlog →</a>
+    <a href="#features" class="cta-secondary">Back to features</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>flowlog</span>
+    <span>built with Vite + React</span>
+  </div>
+</footer>
+
+</body>
 </html>
-
